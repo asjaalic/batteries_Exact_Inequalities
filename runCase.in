@@ -1,0 +1,6 @@
+DataPath = C:\\Users\\Jesenka\\Desktop\\ASJA
+InputPath = C:\\Users\\Jesenka\\Desktop\\ASJA
+ResultPath = C:\\Users\\Jesenka\\Desktop\\ASJA\\RESULTS
+#ending to case name 
+CaseName = _Version_exact_inequalities
+
