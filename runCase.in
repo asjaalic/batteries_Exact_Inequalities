@@ -1,6 +1,6 @@
-DataPath = C:\\Users\\Jesenka\\Desktop\\ASJA
-InputPath = C:\\Users\\Jesenka\\Desktop\\ASJA
-ResultPath = C:\\Users\\Jesenka\\Desktop\\ASJA\\RESULTS
+DataPath = C:\\GitSource-Batteries\\Batteries - exact - inequalities
+InputPath = C:\\GitSource-Batteries\\Batteries - exact - inequalities
+ResultPath = C:\\GitSource-Batteries\\Batteries - exact - inequalities
 #ending to case name 
 CaseName = _Version_exact_inequalities
 

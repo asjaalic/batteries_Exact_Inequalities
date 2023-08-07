@@ -27,7 +27,7 @@ date = string(today())
 # PREPARE INPUT DATA
 to = TimerOutput()
 
-@timeit to "Set input data" begin
+#@timeit to "Set input data" begin
 
   #Set run case - indirizzi delle cartelle di input ed output
   case = set_runCase()
@@ -85,7 +85,7 @@ end
 
 # SAVE DATA IN EXCEL FILES
 if runMode.excel_savings
-  cartella = "C:\\Users\\Jesenka\\Desktop\\ASJA\\RESULTS"
+  cartella = "C:\\GitSource-Batteries\\Batteries - exact - inequalities\\RESULTS"
   cd(cartella)
   Saving = data_saving(InputParameters,ResultsOpt)
 else

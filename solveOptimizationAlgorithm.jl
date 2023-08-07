@@ -8,7 +8,6 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
     println("Solving Optimization Problem")
 
     k = NHoursStep/(2*Nfull)
-    #k= NHoursStep*max_P/(2*Nfull*max_SOC)
 
     objective = 0
     revenues_per_stage = zeros(NStages)
@@ -32,17 +31,6 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
     w_xy = zeros(NSteps+1)
     w_xz = zeros(NSteps+1)
     w_zy = zeros(NSteps+1)
-
-   #= soc_aux =zeros(NSteps)
-    p_aux = zeros(NSteps)
-    d = zeros(NSteps)
-    deg = zeros(NSteps)
-    d_1 =zeros(NSteps)
-    d_2 = zeros(NSteps)
-    deg_1 = zeros(NSteps)
-    deg_2 =zeros(NSteps)
-    u = zeros(NSteps)
-    =#
 
     soh_final = zeros(NStages)
     soh_initial = zeros(NStages)

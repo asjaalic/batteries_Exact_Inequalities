@@ -43,6 +43,7 @@ function data_saving(InputParameters::InputParam,ResultsOpt::Results)
         steps = DataFrame()
 
         steps[!,"Step"] = ((iStage-1)*NHoursStage+1):(NHoursStage*iStage)
+        steps[!, "Energy_prices €/MWh"] = Power_prices[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
         steps[!,"SOC MWh"] = soc[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
         steps[!, "Charge MW"] = charge[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
         steps[!, "Discharge MW"] = discharge[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
@@ -57,22 +58,6 @@ function data_saving(InputParameters::InputParam,ResultsOpt::Results)
         steps[!, "XY"] = w_xy[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
         steps[!, "XZ"] = w_xz[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
         steps[!, "ZY"] = w_zy[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-
-        #=
-        steps[!, "d"] = d[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "d_1"] = d_1[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "d_2"] = d_2[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "d_3"] = d_3[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Deg"] = deg[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Deg_1"] = deg_1[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Deg_2"] = deg_2[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Deg_3"] = deg_3[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Binary u_1"] = u1[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "Binary u_2"] = u2[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "AUX"] = soc_aux[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
-        steps[!, "P_AUX "] = p_aux[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)] 
-        =#
-        steps[!, "Energy_prices €/MWh"] = Power_prices[((iStage-1)*NHoursStage+1):(NHoursStage*iStage)]
 
         XLSX.writetable("$iStage stage $nameF.xlsx", overwrite=true,                                       #$nameFile
         results_steps = (collect(DataFrames.eachcol(steps)),DataFrames.names(steps)),
