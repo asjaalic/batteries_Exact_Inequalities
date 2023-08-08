@@ -24,13 +24,17 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
     x = zeros(NSteps+1)
     y = zeros(NSteps+1)
     z = zeros(NSteps+1)
-    #w = zeros(NSteps+1)
+    u = zeros(NSteps+1)
     w_xx = zeros(NSteps+1)
     w_yy = zeros(NSteps+1)
     w_zz = zeros(NSteps+1)
     w_xy = zeros(NSteps+1)
     w_xz = zeros(NSteps+1)
     w_zy = zeros(NSteps+1)
+    w_uu = zeros(NSteps+1)
+    w_xu = zeros(NSteps+1)
+    w_yu = zeros(NSteps+1)
+    w_zu = zeros(NSteps+1)
 
     soh_final = zeros(NStages)
     soh_initial = zeros(NStages)
@@ -60,7 +64,7 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
             x[iStep] = JuMP.value(problem.x[iStep])
             y[iStep] = JuMP.value(problem.y[iStep])
             z[iStep] = JuMP.value(problem.z[iStep])
-            #w = JuMP.value(problem.w[iStep])
+            u[iStep] = JuMP.value(problem.u[iStep])
             w_xx[iStep] = JuMP.value(problem.w_xx[iStep])
             w_yy[iStep] = JuMP.value(problem.w_yy[iStep])
             w_zz[iStep] = JuMP.value(problem.w_zz[iStep])
@@ -68,17 +72,10 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
             w_xz[iStep] = JuMP.value(problem.w_xz[iStep])
             w_zy[iStep] = JuMP.value(problem.w_zy[iStep])
 
-            #=
-            soc_aux[iStep] = JuMP.value(problem.SOC_aux[iStep])
-            p_aux[iStep] = JuMP.value(problem.P_aux[iStep])
-            d[iStep] = JuMP.value(problem.d[iStep])       
-            deg[iStep] = JuMP.value(problem.deg[iStep])
-            d_1[iStep] = JuMP.value(problem.d_1[iStep])
-            d_2[iStep] = JuMP.value(problem.d_2[iStep])
-            deg_1[iStep] = JuMP.value(problem.deg_1[iStep])
-            deg_2[iStep] = JuMP.value(problem.deg_2[iStep])
-            u[iStep] = JuMP.value(problem.u[iStep])
-            =#
+            w_uu[iStep] = JuMP.value(problem.w_uu[iStep])
+            w_xu[iStep] = JuMP.value(problem.w_xu[iStep])
+            w_yu[iStep] = JuMP.value(problem.w_yu[iStep])
+            w_zu[iStep] = JuMP.value(problem.w_zu[iStep])
 
         end
 
@@ -87,13 +84,18 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
         x[end] = JuMP.value(problem.x[end])
         y[end] = JuMP.value(problem.y[end])
         z[end] = JuMP.value(problem.z[end])
-        #w = JuMP.value(problem.w[iStep])
+        u[end] = JuMP.value(problem.u[end])
         w_xx[end] = JuMP.value(problem.w_xx[end])
         w_yy[end] = JuMP.value(problem.w_yy[end])
         w_zz[end] = JuMP.value(problem.w_zz[end])
         w_xy[end] = JuMP.value(problem.w_xy[end])
         w_xz[end] = JuMP.value(problem.w_xz[end])
         w_zy[end] = JuMP.value(problem.w_zy[end])
+
+        w_uu[end] = JuMP.value(problem.w_uu[end])
+        w_xu[end] = JuMP.value(problem.w_xu[end])
+        w_yu[end] = JuMP.value(problem.w_yu[end])
+        w_zu[end] = JuMP.value(problem.w_zu[end])
 
         for iStage=1:NStages
             soh_final[iStage] = JuMP.value(problem.soh_final[iStage])
@@ -116,7 +118,7 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
         cost_rev[1] = Battery_price[1]*(soh_initial[1]-min_SOH)
 
         
-        revenues_per_stage[NStages] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((NStages-1)*NHoursStage+1):(NHoursStage*NStages)) + Battery_price[NStages+1]*(soh_final[NStages]-min_SOH)-Battery_price[NStages-1]*(soh_initial[NStages]-soh_final[NStages-1])
+        revenues_per_stage[NStages] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((NStages-1)*NHoursStage+1):(NHoursStage*NStages)) + Battery_price[NStages+1]*(soh_final[NStages]-min_SOH)-Battery_price[NStages]*(soh_initial[NStages]-soh_final[NStages-1])
         gain_stage[NStages]= sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((NStages-1)*NHoursStage+1):(NHoursStage*NStages))
         cost_rev[NStages] = -Battery_price[NStages+1]*(soh_final[NStages]-min_SOH) + Battery_price[NStages]*(soh_initial[NStages]-soh_final[NStages-1])
         
@@ -139,21 +141,17 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
         x,
         y,
         z,
+        u,
         w_xx,
         w_yy,
         w_zz,
+        w_uu,
         w_xy,
         w_xz,
         w_zy,
-       #= soc_aux,
-        p_aux,
-        d,
-        d_1,
-        d_2,
-        deg_1,
-        deg_2,
-        u,
-        =#
+        w_xu,
+        w_yu,
+        w_zu,
         soh_final,
         soh_initial,  
     )

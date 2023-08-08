@@ -13,7 +13,6 @@ using XLSX
 using Parameters
 using Dates
 using CSV
-using Plots
 
 # Calls the other Julia files
 include("Structures.jl")
@@ -27,7 +26,7 @@ date = string(today())
 # PREPARE INPUT DATA
 to = TimerOutput()
 
-#@timeit to "Set input data" begin
+@timeit to "Set input data" begin
 
   #Set run case - indirizzi delle cartelle di input ed output
   case = set_runCase()
@@ -43,12 +42,11 @@ to = TimerOutput()
 
   # Read power prices from a file [€/MWh]
   
-  #Battery_price = rand(100000:0.01:1000000, 21);
-  #Battery_price = read_csv("Battery_prices_exp.csv",case.DataPath)
   Battery_price = read_csv("Battery_decreasing_prices.csv",case.DataPath)
-  #Battery_price = read_csv("Battery_prices_random.csv",case.DataPath)
+  #Battery_price = read_csv("Battery_prices_low_variation.csv",case.DataPath)
 
-  Power_prices = read_csv("Prezzi_Min_Max_3 anni.csv", case.DataPath);
+  Pp = read_csv("Prezzi_Min_Max_3 anni.csv", case.DataPath);
+  Power_prices = vcat(Pp,Pp,Pp,Pp)
   #Pp20 = read_csv("prices_2020_8760.csv", case.DataPath);
   #Pp21 = read_csv("prices_2021_8760.csv", case.DataPath);
   #Pp22 = read_csv("prices_2022_8760.csv", case.DataPath);

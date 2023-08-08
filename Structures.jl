@@ -80,27 +80,17 @@ struct BuildStageProblem
     x::Any
     y::Any
     z::Any
-    #w::Any
+    u::Any
     w_xx::Any
     w_yy::Any
     w_zz::Any
     w_xy::Any
     w_xz::Any
     w_zy::Any
-    #=
-    SOC_aux::Any
-    P_aux::Any
-    d::Any
-    u::Any
-    u1::Any
-    u2::Any
-    d_1::Any
-    d_2::Any
-    d_3::Any
-    deg_1::Any
-    deg_2::Any
-    deg_3::Any
-    =#
+    w_uu::Any
+    w_xu::Any
+    w_yu::Any
+    w_zu::Any
     soh_final::Any
     soh_new::Any
 end
@@ -119,25 +109,17 @@ struct Results
     x::Any
     y::Any
     z::Any
+    u::Any
     w_xx::Any
     w_yy::Any
     w_zz::Any
+    w_uu::Any
     w_xy::Any
     w_xz::Any
     w_zy::Any
-    #=soc_aux::Any
-    p_aux::Any
-    d::Any
-    d_1::Any
-    d_2::Any
-    d_3::Any
-    deg_1::Any
-    deg_2::Any
-    deg_3::Any
-    u::Any
-    u1::Any
-    u2::Any
-    =#
+    w_xu::Any
+    w_yu::Any
+    w_zu::Any
     soh_final::Any
     soh_initial::Any
 end

@@ -8,14 +8,10 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
     @unpack (min_SOC, max_SOC, Eff_charge, Eff_discharge, max_SOH, min_SOH, Nfull) = Battery ;         
 
     k = NHoursStep/(2*Nfull)
-    #k= NHoursStep*max_P/(2*Nfull*max_SOC)
-    #deg_max= (1/Eff_discharge)^0.5        # 1.05
-    #deg_avg = deg_max/2                   # 0.21
-
 
 
     M = Model(CPLEX.Optimizer)
-    #set_optimizer_attribute(M, "MIPGap", MIPGap)
+    set_optimizer_attribute(M, "CPXPARAM_MIP_Tolerances_MIPGap", 0.005)
     #set_optimizer_attribute(M,"MIPFocus", MIPFocus)
     #set_optimizer_attribute(M,"Method", Method)
     #set_optimizer_attribute(M,"Cuts", Cuts)
@@ -39,7 +35,7 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
     @variable(M, x[iStep=1:NSteps+1], Bin, base_name = "Binary_1")
     @variable(M, y[iStep=1:NSteps+1], Bin, base_name = "Binary_2")
     @variable(M, z[iStep=1:NSteps+1], Bin, base_name = "Binary_3")
-   # @variable(M, w[iStep=1:NSteps+1], Bin, base_name = "Binary_4")
+    @variable(M, u[iStep=1:NSteps+1], Bin, base_name = "Binary_4")
 
     @variable(M, 0<= w_xx[iStep=1:NSteps+1] <= 1, base_name = "xx")
     @variable(M, 0<= w_yy[iStep=1:NSteps+1] <= 1, base_name = "yy")
@@ -47,6 +43,11 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
     @variable(M, 0<= w_xy[iStep=1:NSteps+1] <= 1, base_name = "xy")
     @variable(M, 0<= w_xz[iStep=1:NSteps+1] <= 1, base_name = "xz")
     @variable(M, 0<= w_zy[iStep=1:NSteps+1] <= 1, base_name = "yz")
+
+    @variable(M, 0 <= w_uu[iStep=1:NSteps+1] <=1, base_name = "xu")
+    @variable(M, 0 <= w_xu[iStep=1:NSteps+1] <=1, base_name = "xu")
+    @variable(M, 0 <= w_yu[iStep=1:NSteps+1] <=1, base_name = "xu")
+    @variable(M, 0 <= w_zu[iStep=1:NSteps+1] <=1, base_name = "xu")
 
     # DEFINE OJECTIVE function - length(Battery_price) = NStages+1=21
 
@@ -64,10 +65,12 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
     @constraint(M,energy[iStep=1:NSteps], soc[iStep] + (charge[iStep]*Eff_charge-discharge[iStep]/Eff_discharge)*max_P*NHoursStep == soc[iStep+1] )
     @constraint(M, soc[1]== soc[end])
 
-    @constraint(M, en_bal[iStep=1:NSteps+1], min_SOC + ((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep]) == soc[iStep])
- 
-    @constraint(M, en_square[iStep=1:NSteps+1], soc_quad[iStep] == min_SOC^2+ 2*min_SOC*((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep])+(w_xx[iStep]+4*w_xy[iStep]+8*w_xz[iStep]+4*w_yy[iStep]+16*w_zz[iStep]+16*w_zy[iStep])*((max_SOC-min_SOC)/disc)^2)
+    #@constraint(M, en_bal[iStep=1:NSteps+1], min_SOC + ((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep]) == soc[iStep])
+    @constraint(M, en_bal[iStep=1:NSteps+1], min_SOC + ((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep]+8*u[iStep]) == soc[iStep])    
     
+   # @constraint(M, en_square[iStep=1:NSteps+1], soc_quad[iStep] == min_SOC^2+ 2*min_SOC*((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep])+(w_xx[iStep]+4*w_xy[iStep]+8*w_xz[iStep]+4*w_yy[iStep]+16*w_zz[iStep]+16*w_zy[iStep])*((max_SOC-min_SOC)/disc)^2)
+    @constraint(M, en_square[iStep=1:NSteps+1], soc_quad[iStep] == min_SOC^2+ 2*min_SOC*((max_SOC-min_SOC)/disc)*(x[iStep]+2*y[iStep]+4*z[iStep]+8*u[iStep])+(w_xx[iStep]+4*w_xy[iStep]+8*w_xz[iStep]+16*w_xu[iStep]+4*w_yy[iStep]+16*w_zz[iStep]+16*w_zy[iStep]+32*w_yu[iStep]+64*w_zu[iStep]+64*w_uu[iStep])*((max_SOC-min_SOC)/disc)^2)
+
     # INEQUALITIES CONSTRAINTS
     @constraint(M, xx_1[iStep=1:NSteps+1], w_xx[iStep] <= x[iStep])
     @constraint(M, xx_2[iStep=1:NSteps+1], w_xx[iStep] >= 2*x[iStep]-1)
@@ -90,6 +93,21 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
     @constraint(M, zy_2[iStep=1:NSteps+1], w_zy[iStep] <= y[iStep])
     @constraint(M, zy_3[iStep=1:NSteps+1], w_zy[iStep] >= z[iStep]+y[iStep]-1)
 
+    @constraint(M, uu_1[iStep=1:NSteps+1], w_uu[iStep] <= u[iStep])
+    @constraint(M, uu_2[iStep=1:NSteps+1], w_uu[iStep] >= 2*u[iStep]-1)
+
+    @constraint(M, xu_1[iStep=1:NSteps+1], w_xu[iStep] <= x[iStep])
+    @constraint(M, xu_2[iStep=1:NSteps+1], w_xu[iStep] <= u[iStep])
+    @constraint(M, xu_3[iStep=1:NSteps+1], w_xu[iStep] >= x[iStep]+u[iStep]-1)
+
+    @constraint(M, yu_1[iStep=1:NSteps+1], w_yu[iStep] <= y[iStep])
+    @constraint(M, yu_2[iStep=1:NSteps+1], w_yu[iStep] <= u[iStep])
+    @constraint(M, yu_3[iStep=1:NSteps+1], w_yu[iStep] >= y[iStep]+u[iStep]-1)
+
+    @constraint(M, zu_1[iStep=1:NSteps+1], w_zu[iStep] <= z[iStep])
+    @constraint(M, zu_2[iStep=1:NSteps+1], w_zu[iStep] <= u[iStep])
+    @constraint(M, zu_3[iStep=1:NSteps+1], w_zu[iStep] >= z[iStep]+u[iStep]-1)
+
     # CONSTRAINTS ON DEGRADATION
 
     @constraint(M, deg_1[iStep=1:NSteps], deg[iStep] >= soc_quad[iStep]/max_SOC^2 - soc_quad[iStep+1]/max_SOC^2 + (2/max_SOC)*(soc[iStep+1]-soc[iStep]))
@@ -111,21 +129,17 @@ function BuildStageProblem(InputParameters::InputParam, SolverParameters::Solver
         x,
         y,
         z,
-        #w,
+        u,
         w_xx,
         w_yy,
         w_zz,
         w_xy,
         w_xz,
         w_zy,
-        #SOC_aux,
-        #P_aux,
-        #d,
-        #u,
-        #d_1,
-        #d_2,
-        #deg_1,
-        #deg_2,
+        w_uu,
+        w_xu,
+        w_yu,
+        w_zu,
         soh_final,
         soh_new,
       )
