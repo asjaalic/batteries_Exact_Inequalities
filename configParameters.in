@@ -1,6 +1,6 @@
 
 #problem definition
-    NYears = 1
+    NYears = 0.5
     NMonths = 6
     NHoursStep = 1.0
 

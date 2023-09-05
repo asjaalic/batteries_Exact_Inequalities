@@ -3,8 +3,8 @@
 # Calls the Packages used for the optimization problem
 using JuMP
 using Printf
-#using Gurobi
-using CPLEX
+using Gurobi
+#using CPLEX
 using MathOptInterface
 using JLD
 using TimerOutputs
@@ -45,22 +45,24 @@ to = TimerOutput()
   Battery_price = read_csv("Battery_decreasing_prices.csv",case.DataPath)
   #Battery_price = read_csv("Battery_prices_low_variation.csv",case.DataPath)
 
-  Pp = read_csv("Prezzi_Min_Max_3 anni.csv", case.DataPath);
-  Power_prices = vcat(Pp,Pp,Pp,Pp)
+  #Pp = read_csv("Prezzi_Min_Max_3 anni.csv", case.DataPath);
+  #Power_prices = vcat(Pp,Pp,Pp,Pp)
   #Pp20 = read_csv("prices_2020_8760.csv", case.DataPath);
   #Pp21 = read_csv("prices_2021_8760.csv", case.DataPath);
   #Pp22 = read_csv("prices_2022_8760.csv", case.DataPath);
   #Pp4 = fill(50,NHoursStage);
   #Pp5 = rand(50.00:0.01:300, NHoursStage);
-  #Power_prices = vcat(Pp20',Pp22',Pp20',Pp21',Pp22',Pp20',Pp21',Pp21',Pp22',Pp20');   #  Power_prices = vcat(Pp22',Pp21',Pp20',Pp21',Pp22',Pp20',Pp21',Pp21',Pp22',Pp20'); 
-  #Power_prices = vcat(Pp22',Pp21[1:4380],Pp4,Pp20',Pp21',Pp22',Pp20',Pp21',Pp21',Pp22',Pp20')
+  #Power_prices = vcat(Pp20',Pp21',Pp22',Pp20',Pp21',Pp22',Pp20',Pp21',Pp22',Pp20');   #  Power_prices = vcat(Pp22',Pp21',Pp20',Pp21',Pp22',Pp20',Pp21',Pp21',Pp22',Pp20'); 
+  
+  Pp20 = read_csv("doppi_max_min_20.csv", case.DataPath);
+  Pp21 = read_csv("doppi_max_min_21.csv", case.DataPath);
+  Pp22 = read_csv("doppi_max_min_22.csv", case.DataPath);
+  Power_prices = Pp20[1:730]
   
   # Upload battery's characteristics
   Battery = set_battery_system(runMode, case)
   @unpack (min_SOC, max_SOC, Eff_charge, Eff_discharge, min_P, max_P, max_SOH, min_SOH, Nfull) = Battery; 
 
-  # Upload cuts for mcCormick envelopes
-  #Envelopes = set_envelopes()
 
   # Where and how to save the results
   FinalResPath= set_run_name(case, ResultPath, InputParameters)

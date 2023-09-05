@@ -9,16 +9,16 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
 
     k = NHoursStep/(2*Nfull)
 
-    objective = 0
-    revenues_per_stage = zeros(NStages)
-    gain_stage = zeros(NStages)
-    cost_rev = zeros(NStages)
-    deg_stage = zeros(NStages)
+    objective = 0                   #zeros(NStages)
+    revenues_per_stage = 0
+    gain_stage = 0
+    cost_rev = 0
+    deg_stage = 0
 
-    charge = zeros(NSteps)
-    discharge = zeros(NSteps)
-    soc = zeros(NSteps+1)
-    deg = zeros(NSteps)
+    charge = 0
+    discharge = 0
+    soc = 0
+    deg = 0
 
     soc_quad = zeros(NSteps+1)
     x = zeros(NSteps+1)
@@ -36,9 +36,8 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
     w_yu = zeros(NSteps+1)
     w_zu = zeros(NSteps+1)
 
-    soh_final = zeros(NStages)
-    soh_initial = zeros(NStages)
-    
+    soh_final = 0
+    soh_initial = 0
 
     problem = BuildStageProblem(InputParameters, SolverParameters, Battery)
 
@@ -97,21 +96,22 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
         w_yu[end] = JuMP.value(problem.w_yu[end])
         w_zu[end] = JuMP.value(problem.w_zu[end])
 
-        for iStage=1:NStages
-            soh_final[iStage] = JuMP.value(problem.soh_final[iStage])
-            soh_initial[iStage] = JuMP.value(problem.soh_new[iStage])
+        #for iStage=1:NStages
+            soh_final = JuMP.value(problem.soh_final)
+            soh_initial = JuMP.value(problem.soh_new)
 
-            deg_stage[iStage] = sum(deg[iStep] for iStep=((iStage-1)*NHoursStage+1):(NHoursStage*iStage))*k
-        end
+            deg_stage = sum(deg[iStep] for iStep=1:NSteps)*k
+            #deg_stage[iStage] = sum(deg[iStep] for iStep=((iStage-1)*NHoursStage+1):(NHoursStage*iStage))*k
+        #end
 
         #
-        for iStage=2:(NStages-1)
-            revenues_per_stage[iStage] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((iStage-1)*NHoursStage+1):(NHoursStage*iStage)) - Battery_price[iStage]*(soh_initial[iStage]-soh_final[iStage-1])
-            gain_stage[iStage] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((iStage-1)*NHoursStage+1):(NHoursStage*iStage))
-            cost_rev[iStage] = Battery_price[iStage]*(soh_initial[iStage]-soh_final[iStage-1])
-        end
-        #
-
+        #for iStage=2:(NStages-1)
+        revenues_per_stage = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=1:NSteps) - Battery_price[1]*(soh_initial-min_SOH) + Battery_price[2]*(soh_final-min_SOH)
+        gain_stage = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=1:NSteps)
+        cost_rev = Battery_price[1]*(soh_initial-min_SOH) - Battery_price[2]*(soh_final-min_SOH)
+        #end
+     
+        #=
         revenues_per_stage[1] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((1-1)*NHoursStage+1):(NHoursStage*1)) - Battery_price[1]*(soh_initial[1]-min_SOH)
         gain_stage[1]= sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((1-1)*NHoursStage+1):(NHoursStage*1))
         #cost_rev[1] = Battery_price[1]*(soh_initial[1]-min_SOH)-Battery_price[2]*(soh_final[1]-min_SOH)
@@ -121,7 +121,7 @@ function solveOptimizationProblem(InputParameters::InputParam, SolverParameters:
         revenues_per_stage[NStages] = sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((NStages-1)*NHoursStage+1):(NHoursStage*NStages)) + Battery_price[NStages+1]*(soh_final[NStages]-min_SOH)-Battery_price[NStages]*(soh_initial[NStages]-soh_final[NStages-1])
         gain_stage[NStages]= sum(Power_prices[iStep]*NHoursStep*max_P*(discharge[iStep]-charge[iStep]) for iStep=((NStages-1)*NHoursStage+1):(NHoursStage*NStages))
         cost_rev[NStages] = -Battery_price[NStages+1]*(soh_final[NStages]-min_SOH) + Battery_price[NStages]*(soh_initial[NStages]-soh_final[NStages-1])
-        
+        =#
 
     end
     
