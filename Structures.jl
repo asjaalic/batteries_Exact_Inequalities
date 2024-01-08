@@ -9,7 +9,7 @@
     NMonths::I
     NStages::I                                    # Number of stages of N months in the problem FORMULATION-- calcolato come NYears/NMonths*12
     NHoursStep::F                                 # Number of hours in each time step 
-    NHoursStage::I                                # Number of hours in each Stage (3-4-6 months)
+    #NHoursStage::I                                # Number of hours in each Stage (3-4-6 months)
     NSteps::I                                     # Number of steps in the NYeras --> NYears*8760/NHoursStep
     Big::F                                        # A big number
     conv::F                                       # A small number for degradation convergence
@@ -37,14 +37,6 @@ end
     Cuts::F
     Heuristics::F
 end
-
-#= envelopes
-struct envParam{F<:Float64,I<:Int, S<:String}
-    n_envelopes::I
-    low_x::Any
-    up_x::Any
-end
-=#
   
 # Indirizzi cartelle
 @with_kw struct caseData{S<:String}

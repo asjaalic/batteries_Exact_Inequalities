@@ -35,34 +35,33 @@ to = TimerOutput()
   # Set run mode (how and what to run) and Input parameters
   runMode = read_runMode_file()
   InputParameters = set_parameters(runMode, case)
-  @unpack (NYears, NMonths, NHoursStep, NHoursStage, NStages, NSteps, Big, conv, disc)= InputParameters;
+  @unpack (NYears, NMonths, NHoursStep, NStages, Big, conv, disc, NSteps)= InputParameters;    #NSteps, NHoursStage
 
   # Set solver parameters (Gurobi etc)
   SolverParameters = set_solverParameters()
 
   # Read power prices from a file [€/MWh]
   
-  Battery_price = read_csv("Battery_decreasing_prices.csv",case.DataPath)
-  #Battery_price = read_csv("Battery_prices_low_variation.csv",case.DataPath)
+  Battery_price = read_csv("Battery_decreasing_prices_mid.csv",case.DataPath)
+ 
+  Pp14 = read_csv("Anno 1.csv", case.DataPath);
+  Pp15 = read_csv("Anno 2.csv", case.DataPath);
+  Pp16 = read_csv("Anno 3.csv", case.DataPath);
+  Pp17 = read_csv("Anno 4.csv", case.DataPath);
+  Pp18 = read_csv("Anno 5.csv", case.DataPath);
+  Pp19 = read_csv("Anno 6.csv", case.DataPath);
+  Pp20 = read_csv("Anno 7.csv", case.DataPath);
+  Pp21 = read_csv("Anno 8.csv", case.DataPath);
+  Pp22 = read_csv("Anno 9.csv", case.DataPath);
+  Pp23 = read_csv("Anno 10.csv", case.DataPath);
+  Power_prices = vcat(Pp14,Pp15,Pp16,Pp17,Pp18,Pp19,Pp20,Pp21,Pp22,Pp23);   
 
-  #Pp = read_csv("Prezzi_Min_Max_3 anni.csv", case.DataPath);
-  #Power_prices = vcat(Pp,Pp,Pp,Pp)
-  #Pp20 = read_csv("prices_2020_8760.csv", case.DataPath);
-  #Pp21 = read_csv("prices_2021_8760.csv", case.DataPath);
-  #Pp22 = read_csv("prices_2022_8760.csv", case.DataPath);
-  #Pp4 = fill(50,NHoursStage);
-  #Pp5 = rand(50.00:0.01:300, NHoursStage);
-  #Power_prices = vcat(Pp20',Pp21',Pp22',Pp20',Pp21',Pp22',Pp20',Pp21',Pp22',Pp20');   #  Power_prices = vcat(Pp22',Pp21',Pp20',Pp21',Pp22',Pp20',Pp21',Pp21',Pp22',Pp20'); 
-  
-  Pp20 = read_csv("doppi_max_min_20.csv", case.DataPath);
-  Pp21 = read_csv("doppi_max_min_21.csv", case.DataPath);
-  Pp22 = read_csv("doppi_max_min_22.csv", case.DataPath);
-  Power_prices = Pp20[1:730]
+  #NSteps = length(Power_prices)
+  Steps_stages = [0 685 1297 1896 2431 3057 3521 4070 4549 5106 5485 6087 6557 7168 7659 8192 8597 9127 9611 10213 10701]
   
   # Upload battery's characteristics
   Battery = set_battery_system(runMode, case)
   @unpack (min_SOC, max_SOC, Eff_charge, Eff_discharge, min_P, max_P, max_SOH, min_SOH, Nfull) = Battery; 
-
 
   # Where and how to save the results
   FinalResPath= set_run_name(case, ResultPath, InputParameters)

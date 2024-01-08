@@ -4,16 +4,16 @@
 
 function data_saving(InputParameters::InputParam,ResultsOpt::Results)
 
-    @unpack (NYears, NMonths, NStages, NSteps, Big, NHoursStep, NHoursStage, disc) = InputParameters;
+    @unpack (NYears, NMonths, NStages, Big, NHoursStep, disc, NSteps) = InputParameters;       #NSteps,NHoursStage
     
-   # @unpack (charge,discharge, soc,soc_quad, soh_final, soh_initial, revenues_per_stage, deg, x, y, z, w_xx, w_yy, w_zz, w_xy, w_xz, w_zy, gain_stage, cost_rev, deg_stage) = ResultsOpt;  
-   @unpack (charge,discharge, soc,soc_quad, soh_final, soh_initial, revenues_per_stage, deg, x, y, z, u, w_xx, w_yy, w_zz, w_uu, w_xy, w_xz, w_zy, w_xu, w_yu, w_zu, gain_stage, cost_rev, deg_stage) = ResultsOpt;
+   #@unpack (charge,discharge, soc, revenues_per_stage, x, y, z, w_xx, w_yy, w_zz, w_xy, w_xz, w_zy) = ResultsOpt;  
+   @unpack (charge,discharge, soc,soc_quad,deg, revenues_per_stage, x, y, z, u, w_xx, w_yy, w_zz, w_uu, w_xy, w_xz, w_zy, w_xu, w_yu, w_zu,soh_initial,soh_final,deg_stage,revenues_per_stage,gain_stage, cost_rev) = ResultsOpt;
    @unpack (min_SOC, max_SOC, min_P, max_P, Eff_charge, Eff_discharge, max_SOH, min_SOH, Nfull ) = Battery ; 
 
     hour=string(now())
     a=replace(hour,':'=> '-')
 
-    nameF= "$NStages stages-max_SOH $max_SOH-min_SOC $min_SOC-Ncycles $Nfull-decreasing-15 livelli"
+    nameF= "$NSteps steps - $Eff_charge efficiency quad 06.12"
     nameFile="Final results $a" 
 
     folder = "$nameF"
@@ -24,13 +24,13 @@ function data_saving(InputParameters::InputParam,ResultsOpt::Results)
     general = DataFrame()
     battery_costs= DataFrame()
     
-    general[!, "Stage"] = 1:1:NStages
-    general[!,"SOH_initial"] = soh_initial
-    general[!,"SOH_final"] = soh_final
-    general[!,"Degradation"] = deg_stage
-    general[!,"Net_Revenues"] = revenues_per_stage
-    general[!,"Gain charge/discharge"] = gain_stage
-    general[!,"Cost revamping"] = cost_rer
+    general[!,"Stage"] = 1:1:NStages
+    general[!,"SOH_initial"] = soh_initial[:]
+    general[!,"SOH_final"] = soh_final[:]
+    general[!,"Degradation"] = deg_stage[:]
+    general[!,"Net_Revenues"] = revenues_per_stage[:]
+    general[!,"Gain charge/discharge"] = gain_stage[:]
+    general[!,"Cost revamping"] = cost_rev[:]
 
     battery_costs[!,"Costs €/MWh"] = Battery_price[1:NStages+1]
 
@@ -42,27 +42,27 @@ function data_saving(InputParameters::InputParam,ResultsOpt::Results)
     for iStage=1:NStages
         steps = DataFrame()
 
-        steps[!,"Step"] = 1:1:NSteps                                      #((iStage-1)*NHoursStage+1):(NHoursStage*iStage)
-        steps[!, "Energy_prices €/MWh"] = Power_prices[:]
-        steps[!, "SOC MWh"] = soc[:]
-        steps[!, "Charge MW"] = charge[:]
-        steps[!, "Discharge MW"] = discharge[:]
-        steps[!, "SOC_quad MW"] = soc_quad[:]
-        steps[!, "Deg -"] = deg[:]
-        steps[!, "X"] = x[:]
-        steps[!, "Y"] = y[:]
-        steps[!, "Z"] = z[:]
-        steps[!, "U"] = u[:]
-        steps[!, "XX"] = w_xx[:]
-        steps[!, "YY"] = w_yy[:]
-        steps[!, "ZZ"] = w_zz[:]
-        steps[!, "UU"] = w_uu[:]
-        steps[!, "XY"] = w_xy[:]
-        steps[!, "XZ"] = w_xz[:]
-        steps[!, "ZY"] = w_zy[:]
-        steps[!, "XU"] = w_xu[:]
-        steps[!, "YU"] = w_yu[:]
-        steps[!, "ZU"] = w_zu[:]
+        steps[!,"Step"] = (Steps_stages[iStage]+1):(Steps_stages[iStage+1])
+        steps[!, "Energy_prices €/MWh"] = Power_prices[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "SOC MWh"] = soc[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "Charge MW"] = charge[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "Discharge MW"] = discharge[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "SOC_quad MW"] = soc_quad[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "Deg -"] = deg[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "X"] = x[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "Y"] = y[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "Z"] = z[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "U"] = u[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "XX"] = w_xx[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "YY"] = w_yy[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "ZZ"] = w_zz[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "UU"] = w_uu[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "XY"] = w_xy[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "XZ"] = w_xz[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "ZY"] = w_zy[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "XU"] = w_xu[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "YU"] = w_yu[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
+        steps[!, "ZU"] = w_zu[(Steps_stages[iStage]+1):(Steps_stages[iStage+1])]
 
         XLSX.writetable("$iStage stage $a.xlsx", overwrite=true,                                       #$nameFile
         results_steps = (collect(DataFrames.eachcol(steps)),DataFrames.names(steps)),
